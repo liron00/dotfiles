@@ -1,0 +1,88 @@
+export PATH="/opt/homebrew/opt/node@18/bin:$PATH"
+
+# Added by Windsurf
+export PATH="/Users/liron/.codeium/windsurf/bin:$PATH"
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/opt/homebrew/Caskroom/miniconda/base/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh" ]; then
+        . "/opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh"
+    else
+        export PATH="/opt/homebrew/Caskroom/miniconda/base/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export PATH="$HOME/.local/bin:$PATH"
+
+# Symlink each top-level package in node_modules (supports @scoped packages).
+# New installs go to the worktree only; the source node_modules stays untouched.
+link_node_modules() {
+  python3 -c "
+import os, sys
+src, dst = sys.argv[1], sys.argv[2]
+os.makedirs(dst, exist_ok=True)
+for name in os.listdir(src):
+    s = os.path.join(src, name)
+    d = os.path.join(dst, name)
+    if name.startswith('@'):
+        os.makedirs(d, exist_ok=True)
+        for sub in os.listdir(s):
+            os.symlink(os.path.join(s, sub), os.path.join(d, sub))
+    else:
+        os.symlink(s, d)
+" "$1" "$2"
+}
+
+# cd into a worktree by issue number, e.g. cdi 26
+# If the worktree doesn't exist yet, creates it and launches Claude Code
+cdi() {
+  local dir=~/workspace/relhero-issue-"$1"
+  local main=~/workspace/relhero
+  if [[ ! -d "$dir" ]]; then
+    echo "Creating worktree for issue $1..."
+    git -C "$main" fetch origin
+    if git -C "$main" branch -a --list "*issue-$1*" | grep -q .; then
+      git -C "$main" worktree add "$dir" "claude/issue-$1"
+    else
+      git -C "$main" worktree add -b "claude/issue-$1" "$dir" origin/main
+    fi
+    echo "Linking node_modules..."
+    link_node_modules "$main/apps/web/node_modules" "$dir/apps/web/node_modules"
+    link_node_modules "$main/apps/api/node_modules" "$dir/apps/api/node_modules"
+    echo "Copying .env..."
+    cp "$main/apps/api/.env" "$dir/apps/api/.env" 2>&1 || echo "FAILED: api .env"
+    open -a "Fork" "$dir"
+    cd "$dir"${2:+/apps/$2}
+    claude "/lgi $1"
+  else
+    cd "$dir"${2:+/apps/$2}
+  fi
+}
+
+# Prompt matching Claude Code status line
+precmd() {
+  local root branch repo rel
+  root=$(/usr/bin/git rev-parse --show-toplevel 2>/dev/null)
+  if [[ -n "$root" ]]; then
+    repo=${root:t}
+    rel=${PWD#"$root"}
+    branch=$(/usr/bin/git symbolic-ref --short HEAD 2>/dev/null)
+    if [[ -n "$branch" ]]; then
+      PROMPT="/${repo}${rel} :${branch} $ "
+    else
+      PROMPT="/${repo}${rel} $ "
+    fi
+  else
+    PROMPT="/${PWD:t} $ "
+  fi
+}
