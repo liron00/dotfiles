@@ -69,6 +69,23 @@ cdi() {
   fi
 }
 
+# Clean up a worktree for a GitHub issue, e.g. dgi 26
+dgi() {
+  local N
+  if [[ -n "$1" ]]; then
+    N="$1"
+  elif [[ "$(pwd)" =~ relhero-issue-([0-9]+) ]]; then
+    N="${MATCH[1]}"
+  else
+    echo "Usage: dgi <issue-number>" >&2
+    return 1
+  fi
+  cd ~/workspace/relhero
+  git worktree remove ../relhero-issue-"$N"
+  git branch -D claude/issue-"$N"
+  echo "Cleaned up issue #$N"
+}
+
 # Prompt matching Claude Code status line
 precmd() {
   local root branch repo rel
