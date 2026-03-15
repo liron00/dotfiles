@@ -1,0 +1,68 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Search",
+      "Glob",
+      "Grep",
+      "WebSearch",
+      "WebFetch",
+      "Bash(ls*)",
+      "Bash(grep*)",
+      "Bash(rg*)",
+      "Bash(find*)",
+      "Bash(cat*)",
+      "Bash(head*)",
+      "Bash(tail*)",
+      "Bash(echo*)",
+      "Bash(wc*)",
+      "Bash(diff*)",
+      "Bash(jq*)",
+      "Bash(which*)",
+      "Bash(cd*)",
+      "Bash(pwd*)",
+      "Bash(gh pr create *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr list*)",
+      "Bash(gh pr checks *)",
+      "Bash(gh pr comment *)",
+      "Bash(gh pr diff *)",
+      "Bash(gh pr status*)",
+      "Bash(gh issue *)",
+      "Bash(gh api *)",
+      "Bash(gh run *)",
+      "Bash(open -a *)",
+      "Task"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "msg=$(cat | jq -r '.last_assistant_message // \"Done\"' | head -c 100 | tr -d \"'\\\"\"); osascript -e \"display notification \\\"$msg\\\" with title \\\"Claude Code\\\"\"; afplay /System/Library/Sounds/Purr.aiff -v 1.75"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "msg=$(cat | jq -r '.message // \"\"' | sed 's/Claude wants to use //;s/Claude needs your permission to //' | head -c 100 | tr -d \"'\\\"\"); osascript -e \"display notification \\\"$msg\\\" with title \\\"Permission Needed\\\"\"; afplay /System/Library/Sounds/Ping.aiff -v 1.75"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "input=$(cat); cwd=$(echo \"$input\" | jq -r '.workspace.current_dir'); root=$(git -C \"$cwd\" --no-optional-locks rev-parse --show-toplevel 2>/dev/null); if [ -n \"$root\" ]; then repo=$(basename \"$root\"); rel=${cwd#\"$root\"}; path=\"/$repo$rel\"; branch=$(git -C \"$cwd\" --no-optional-locks symbolic-ref --short HEAD 2>/dev/null); if [ -n \"$branch\" ]; then echo \"$path :$branch\"; else echo \"$path\"; fi; else echo \"/$(basename \"$cwd\")\"; fi"
+  },
+  "alwaysThinkingEnabled": true,
+  "fastMode": true,
+  "autoUpdatesChannel": "stable"
+}
