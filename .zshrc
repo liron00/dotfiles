@@ -22,6 +22,8 @@ unset __conda_setup
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# Ensure nvm-installed Claude Code takes precedence over cmux's bundled version
+alias claude="$HOME/.nvm/versions/node/$(node -v)/bin/claude"
 export PATH="$HOME/.local/bin:$PATH"
 
 # Symlink each top-level package in node_modules (supports @scoped packages).
