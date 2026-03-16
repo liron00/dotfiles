@@ -28,6 +28,7 @@ link .zprofile
 # Claude Code
 link .claude/settings.json
 link .claude/CLAUDE.md
+link .claude/skills
 
 echo ""
 echo "Done!"
