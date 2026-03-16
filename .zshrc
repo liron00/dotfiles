@@ -26,25 +26,6 @@ export NVM_DIR="$HOME/.nvm"
 alias claude="$HOME/.nvm/versions/node/$(node -v)/bin/claude"
 export PATH="$HOME/.local/bin:$PATH"
 
-# Symlink each top-level package in node_modules (supports @scoped packages).
-# New installs go to the worktree only; the source node_modules stays untouched.
-link_node_modules() {
-  python3 -c "
-import os, sys
-src, dst = sys.argv[1], sys.argv[2]
-os.makedirs(dst, exist_ok=True)
-for name in os.listdir(src):
-    s = os.path.join(src, name)
-    d = os.path.join(dst, name)
-    if name.startswith('@'):
-        os.makedirs(d, exist_ok=True)
-        for sub in os.listdir(s):
-            os.symlink(os.path.join(s, sub), os.path.join(d, sub))
-    else:
-        os.symlink(s, d)
-" "$1" "$2"
-}
-
 # cd into a worktree by issue number, e.g. cdi 26
 # If the worktree doesn't exist yet, creates it and launches Claude Code
 cdi() {
@@ -58,9 +39,6 @@ cdi() {
     else
       git -C "$main" worktree add -b "claude/issue-$1" "$dir" origin/main
     fi
-    echo "Linking node_modules..."
-    link_node_modules "$main/apps/web/node_modules" "$dir/apps/web/node_modules"
-    link_node_modules "$main/apps/api/node_modules" "$dir/apps/api/node_modules"
     echo "Copying .env..."
     cp "$main/apps/api/.env" "$dir/apps/api/.env" 2>&1 || echo "FAILED: api .env"
     open -a "Fork" "$dir"
