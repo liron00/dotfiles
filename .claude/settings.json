@@ -63,7 +63,7 @@
     "command": "input=$(cat); cwd=$(echo \"$input\" | jq -r '.workspace.current_dir'); root=$(git -C \"$cwd\" --no-optional-locks rev-parse --show-toplevel 2>/dev/null); if [ -n \"$root\" ]; then repo=$(basename \"$root\"); rel=${cwd#\"$root\"}; path=\"/$repo$rel\"; branch=$(git -C \"$cwd\" --no-optional-locks symbolic-ref --short HEAD 2>/dev/null); if [ -n \"$branch\" ]; then echo \"$path :$branch\"; else echo \"$path\"; fi; else echo \"/$(basename \"$cwd\")\"; fi"
   },
   "alwaysThinkingEnabled": true,
-  "effortLevel": "medium",
+  "effortLevel": "high",
   "fastMode": true,
   "autoUpdatesChannel": "stable"
 }

@@ -12,7 +12,12 @@ When I say "show me" a file or code, print the content in a code block in your r
 
 ## Database
 
-Never run any database operation that could take more than 2 seconds without first confirming with me. This includes queries on large/unindexed tables, full table scans, ORDER BY on non-indexed columns, COUNT(*) on large tables, etc. If you're unsure whether a query will be fast, ask first.
+Never run any database operation that could take more than 2 seconds without first confirming with me. This applies to ALL databases (PostgreSQL, RethinkDB, etc). If you're unsure whether a query will be fast, ask first. Examples of slow operations:
+- RethinkDB: `.filter()` is a full table scan — use `.get()` or secondary index queries only
+- PG: ORDER BY or WHERE on non-indexed columns on large tables
+- PG: COUNT(*) on large tables
+- PG: GREATEST() across multiple columns without indexes
+- Any query without a primary key or index lookup on a large table
 
 ## Git
 

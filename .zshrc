@@ -85,3 +85,4 @@ precmd() {
     PROMPT="/${PWD:t} $ "
   fi
 }
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
