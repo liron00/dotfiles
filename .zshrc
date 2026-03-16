@@ -63,9 +63,11 @@ cdi() {
     cp "$main/apps/api/.env" "$dir/apps/api/.env" 2>&1 || echo "FAILED: api .env"
     open -a "Fork" "$dir"
     cd "$dir"${2:+/apps/$2}
+    [[ -n "$2" ]] && yarn install
     claude "/lgi $1"
   else
     cd "$dir"${2:+/apps/$2}
+    [[ -n "$2" ]] && yarn install
   fi
 }
 
